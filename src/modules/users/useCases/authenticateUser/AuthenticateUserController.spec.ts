@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 import { app } from '../../../../app';
 
 let connection: Connection;
-describe('Show User Profile', () => {
+describe('User Authenticate', () => {
   beforeAll(async () => {
     connection = await createConnection();
     await connection.runMigrations();
@@ -17,7 +17,7 @@ describe('Show User Profile', () => {
       `INSERT INTO USERS(id, name, email, password, created_at, updated_at)
         values('${id}', 'user', 'user@gmail.com', '${password}', 'now()', 'now()')
       `
-    )
+    );
   })
 
   afterAll(async () => {
@@ -25,23 +25,17 @@ describe('Show User Profile', () => {
     await connection.close();
   })
 
-  it ('Should be able to show user profile', async () => {
-    const responseToken = await request(app).post('/api/v1/sessions').send({
+  it('Should be able to create session user', async () => {
+    const response = await request(app).post('/api/v1/sessions').send({
       email: 'user@gmail.com',
       password: '12345'
     });
 
-    const { token } = responseToken.body;
-
-    const response = await request(app).get('/api/v1/profile')
-    .set({
-      Authorization: `Baerer ${token}`
-    });
+    console.log(response.body)
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('id')
-    expect(response.body.name).toEqual('user')
-
+    expect(response.body.user).toHaveProperty('id')
+    expect(response.body).toHaveProperty('token')
+    expect(response.body.user.name).toEqual('user')
   })
 })
-
